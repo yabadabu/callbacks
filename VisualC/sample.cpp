@@ -177,15 +177,14 @@ int test_lambda()
 // Lambda implementation can be instantiated directly in user code.
 template <typename TFn>
 struct Deletate {
-  void (*generator)(void*) = nullptr;
-  void*  func = nullptr;
+  void (*generator)(void*, int) = nullptr;
   char   storage[24];
   
   void* getStorage() { return &storage[0]; }
 
   template< typename Func >
-  static void callGenerator( void* fn_void ) {
-    return const_cast<Func &>(*reinterpret_cast<const Func *>(fn_void))(2);
+  static void callGenerator( void* fn_void, int id ) {
+    return const_cast<Func &>(*reinterpret_cast<const Func *>(fn_void))(id);
   }
 
   Deletate()
@@ -195,13 +194,13 @@ struct Deletate {
   template< typename Func >
   Deletate(Func f)
   {
-    func = new (getStorage()) Func(FUNC_FORWARD(Func, f));
+    new (getStorage()) Func(FUNC_FORWARD(Func, f));
     generator = &callGenerator<Func>;
   }
 
 
-  void call() {
-    generator(func);
+  void call(int id) {
+    generator(getStorage(), id);
   }
 
   size_t size() const { return 0; }
@@ -221,9 +220,9 @@ int test2()
     printf("Hi from lambda with f = %f. id=%d\n", f, id);
   };
   TCB c3( c1 );
-  c1.call();
-  c2.call();
-  c3.call();
+  c1.call(10);
+  c2.call(20);
+  c3.call(30);
 
   printf("sizeof of TCB is %zd\n", c2.size());
   return 0;
