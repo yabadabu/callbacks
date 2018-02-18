@@ -196,7 +196,7 @@ struct Deletate {
   Deletate(Func f)
   {
     func = new (getStorage()) Func(FUNC_FORWARD(Func, f));
-    generator = &Deletate<TFn>::callGenerator<Func>;
+    generator = &callGenerator<Func>;
   }
 
 
