@@ -176,7 +176,7 @@ int test_lambda()
 // ------------------------------------------------------------------
 // Lambda implementation can be instantiated directly in user code.
 template <typename TFn>
-struct Deletate {
+struct Delegate {
   void (*generator)(void*, int) = nullptr;
   char   storage[24];
   
@@ -187,23 +187,17 @@ struct Deletate {
     return const_cast<Func &>(*reinterpret_cast<const Func *>(fn_void))(id);
   }
 
-  Deletate()
-  {
-  }
-
   template< typename Func >
-  Deletate(Func f)
+  Delegate(Func f)
   {
     new (getStorage()) Func(FUNC_FORWARD(Func, f));
     generator = &callGenerator<Func>;
   }
 
-
   void call(int id) {
     generator(getStorage(), id);
   }
 
-  size_t size() const { return 0; }
 };
 
 void static_int(int id) {
@@ -212,9 +206,9 @@ void static_int(int id) {
 
 int test2()
 {
-  typedef Deletate<void(int)> TCB;
+  typedef Delegate<void(int)> TCB;
   TCB c1(static_int);
-  printf("sizeof of TCB is %zd\n", c1.size());
+  printf("sizeof of TCB is %zd\n", sizeof( TCB ));
   float f = 3.14f;
   TCB c2 = [f](int id) {
     printf("Hi from lambda with f = %f. id=%d\n", f, id);
@@ -224,7 +218,7 @@ int test2()
   c2.call(20);
   c3.call(30);
 
-  printf("sizeof of TCB is %zd\n", c2.size());
+  printf("sizeof of TCB is %zd\n", sizeof(c2));
   return 0;
 }
 
