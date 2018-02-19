@@ -178,27 +178,26 @@ struct Delegate;
 
 // ------------------------------------------------------------------
 // Lambda implementation can be instantiated directly in user code.
-template <typename TResult>
-struct Delegate<TResult(int)> {
-  TResult(*generator)(void*, int) = nullptr;
+template <typename TResult, typename ...Args>
+struct Delegate<TResult(Args...)> {
+  TResult(*generator)(const void*, Args...) = nullptr;
   char     storage[24];
   
   void* getStorage() { return &storage[0]; }
 
   template< typename Func >
-  static TResult callGenerator( void* fn_void, int id ) {
-    return const_cast<Func &>(*reinterpret_cast<const Func *>(fn_void))(id);
+  static TResult callGenerator( const void* fn_void, Args... args) {
+    return const_cast<Func &>(*reinterpret_cast<const Func *>(fn_void))(args...);
   }
 
   template< typename Func >
-  Delegate(Func f)
-  {
+  Delegate(Func f) {
     new (getStorage()) Func(FUNC_FORWARD(Func, f));
     generator = &callGenerator<Func>;
   }
 
-  TResult call(int id) {
-    generator(getStorage(), id);
+  TResult call(Args... args) {
+    generator(getStorage(), args...);
   }
 
 };
@@ -229,9 +228,6 @@ int test2()
 // -------------------------------------------------
 void test()
 {
-
-  test_lambda();
-
   typedef jaba::function_ref<void(int)> TCallback;
   
   //typedef ssvu::FastFunc<void(int)> TCallback;
@@ -261,9 +257,9 @@ void test()
     //bus.add(10, [&d1](int x) { d1.method1(x); });
    // bus.add(10, lambda1);
     bus.add(10, publicFn);
-    bus.add(10, TCallback::make< CBase, &CBase::method1 >(&b));
-    bus.add(10, TCallback::make< CDerived1, &CDerived1::method1 >(&d1));
-    bus.add(10, TCallback::make< CBase, &CBase::method1 >(&d1));
+    //bus.add(10, TCallback::make< CBase, &CBase::method1 >(&b));
+    //bus.add(10, TCallback::make< CDerived1, &CDerived1::method1 >(&d1));
+    //bus.add(10, TCallback::make< CBase, &CBase::method1 >(&d1));
     //bus.add(10, 3);     // Now fails with the error: 'term does not evaluate to a function taking 1 argument inside the callacks.h
   bus.on(10);
 }
