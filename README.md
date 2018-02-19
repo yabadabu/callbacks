@@ -5,6 +5,7 @@
 + No heap allocation requested. The lambda is saved inside the callback itself.
 + The local storage defaults to 24 bytes, but can be enlarged if required.
 + No copy-ctor, no move semantics or destroying the saved lambda.
++ Tested under VisualC++ 2017 & OSX
 
 ---
     // Some type of event registration between uint32_t -> callbacks

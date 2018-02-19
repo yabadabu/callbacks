@@ -1,4 +1,5 @@
-/VisualC/x64
-/VisualC/.vs
-/VisualC/Win32
-/VisualC/Build
+/example/x64
+/example/.vs
+/example/Win32
+/example/Build
+/example/objs
