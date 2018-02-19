@@ -1,10 +1,10 @@
 # Callback
 
-A thin callback class (defaults to 32bytes, but can be as short as 16 bytes)
-You don't need to derive from anything to get called, just specify the global function or assign a lambda. 
-No heap allocation requested. The lambda is saved inside the callback itself.
-The local storage defaults to 24 bytes, but can be enlarged if required.
-No copy-ctor, no move semantics or destroying the saved lambda.
+  A thin callback class (defaults to 32bytes, but can be as short as 16 bytes)
+  You don't need to derive from anything to get called, just specify the global function or assign a lambda. 
+  No heap allocation requested. The lambda is saved inside the callback itself.
+  The local storage defaults to 24 bytes, but can be enlarged if required.
+  No copy-ctor, no move semantics or destroying the saved lambda.
 
     // Some type of event registration between uint32_t -> callbacks
     template< typename TCallbackType >
