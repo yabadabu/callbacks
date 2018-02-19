@@ -198,8 +198,14 @@ public:
   template< typename Func >
   Delegate(Func f)
     : caller(&callGenerator<Func>) {
+    
+    // Too may lambda capture args might require more space in the local storage
+    static_assert(sizeof(Func) <= N, "Need more space to store callback. Increase the template arg N of the callback.");
+    
     // Copy f into storage erasing the type
     new (storage) Func(static_cast<Func&&>(f));
+    
+    // printf("Using %zd/%zd bytes of the storage\n", sizeof(Func), N);
   }
 
   // Operator() forwards call to our specific callGenerator with the given args
@@ -263,7 +269,7 @@ void test()
 
   // ------------------------------------------
   TMsgBus<TCallback> bus;
-    bus.add(10, [&b](int x) { b.method1(x); });
+    bus.add(10, [&b, id](int x) { b.method1(x); printf("id is %d\n", id); });  // This requires 16 bytes
     bus.add(10, [&b](int x) { b.method2(x); });
     bus.add(10, [&d1](int x) { d1.method1(x); });
     bus.add(10, lambda1);
