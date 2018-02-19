@@ -1,8 +1,10 @@
 # Callback
 
-A thin callback class (just two pointers), you don't need to derive from anything to get called, just specify the global
-function or the class method and the object.
-User must ensure the object is still valid when the callback is fired.
+A thin callback class (defaults to 32bytes, but can be as short as 16 bytes)
+You don't need to derive from anything to get called, just specify the global function or assign a lambda. 
+No heap allocation requested. The lambda is saved inside the callback itself.
+The local storage defaults to 24 bytes, but can be enlarged if required.
+No copy-ctor, no move semantics or destroying the saved lambda.
 
     // Some type of event registration between uint32_t -> callbacks
     template< typename TCallbackType >
@@ -22,9 +24,9 @@ User must ensure the object is still valid when the callback is fired.
       }
     };
 
-    void test3()
+    void test())
     {
-      typedef jaba::function_view<void(int)> TCallback;
+      typedef jaba::Callback<void(int)> TCallback;
       CBase b;
       CDerived1 d1;
       CBase* d2 = new CDerived2;

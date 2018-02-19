@@ -9,15 +9,15 @@
 namespace jaba {
 
   // ------------------------------------------------------------------
-  template <typename TFn, size_t N = 24>
-  class Delegate;
+  template <typename Fn, size_t N = 24>
+  class Callback;
 
   // ------------------------------------------------------------------
-  template <typename TResult, typename ...Args, size_t N>
-  class Delegate<TResult(Args...), N> {
+  template <typename Result, typename ...Args, size_t N>
+  class Callback<Result(Args...), N> {
 
     // Pointer to the function which will do the real code
-    TResult(*caller)(const void*, Args...) = nullptr;
+    Result(*caller)(const void*, Args...) = nullptr;
 
     // To store the Func lambda args
     char     storage[N];
@@ -25,7 +25,7 @@ namespace jaba {
     // Function template generator that will restore the erased type to the original calling function
     // from the fn_voids
     template< typename Func >
-    static TResult callGenerator(const void* fn_void, Args... args) {
+    static Result callGenerator(const void* fn_void, Args... args) {
       return (*reinterpret_cast<const Func *>(fn_void))(std::forward<Args...>(args...));
     }
 
@@ -33,7 +33,7 @@ namespace jaba {
 
     // Single ctor from a callable
     template< typename Func >
-    Delegate(Func f)
+    Callback(Func f)
       : caller(&callGenerator<Func>) {
 
       // Too may lambda capture args might require more space in the local storage
@@ -46,7 +46,7 @@ namespace jaba {
     }
 
     // Operator() forwards call to our specific callGenerator with the given args
-    TResult operator()(Args... args) const {
+    Result operator()(Args... args) const {
       return caller(storage, std::forward<Args...>(args...));
     }
 

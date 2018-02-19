@@ -67,8 +67,8 @@ void static_int(int id) {
 
 int test2()
 {
-  typedef jaba::Delegate<void(int), 56> TCBBig;
-  typedef jaba::Delegate<void(int)> TCB;
+  typedef jaba::Callback<void(int), 56> TCBBig;
+  typedef jaba::Callback<void(int)> TCB;
   TCB c1(static_int);
   printf("sizeof of TCBBig is %zd\n", sizeof(TCBBig));
   printf("sizeof of TCB is %zd\n", sizeof(TCB));
@@ -89,7 +89,7 @@ int test2()
 // -------------------------------------------------
 void test()
 {
-  typedef jaba::Delegate<void(int)> TCallback;
+  typedef jaba::Callback<void(int)> TCallback;
   
   CBase b;
   CDerived1 d1;
