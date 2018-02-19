@@ -51,8 +51,6 @@
         bus.add(10, [&d1](int x) { d1.method1(x); });
         bus.add(10, lambda1);
         bus.add(10, publicFn);
-        bus.add(10, TCallback::make< CBase, &CBase::method1 >(&b));
-        bus.add(10, TCallback::make< CBase, &CBase::method1 >(d2));
 
       }
       bus.on(10);
