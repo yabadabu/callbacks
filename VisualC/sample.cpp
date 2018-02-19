@@ -196,7 +196,7 @@ struct Delegate<TResult(Args...)> {
     generator = &callGenerator<Func>;
   }
 
-  TResult call(Args... args) {
+  TResult operator()(Args... args) {
     generator(getStorage(), args...);
   }
 
@@ -216,9 +216,9 @@ int test2()
     printf("Hi from lambda with f = %f. id=%d\n", f, id);
   };
   TCB c3( c1 );
-  c1.call(10);
-  c2.call(20);
-  c3.call(30);
+  c1(10);
+  c2(20);
+  c3(30);
 
   printf("sizeof of TCB is %zd\n", sizeof(c2));
   return 0;
