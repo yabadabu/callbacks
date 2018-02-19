@@ -171,13 +171,10 @@ int test_lambda()
 
 #include <new>
 
-#define FUNC_FORWARD(type, value) static_cast<type &&>(value)
-
 template <typename TFn>
 struct Delegate;
 
 // ------------------------------------------------------------------
-// Lambda implementation can be instantiated directly in user code.
 template <typename TResult, typename ...Args>
 struct Delegate<TResult(Args...)> {
   TResult(*generator)(const void*, Args...) = nullptr;
@@ -192,7 +189,7 @@ struct Delegate<TResult(Args...)> {
 
   template< typename Func >
   Delegate(Func f) {
-    new (getStorage()) Func(FUNC_FORWARD(Func, f));
+    new (getStorage()) Func(static_cast<Func&&>(f));
     generator = &callGenerator<Func>;
   }
 
@@ -228,7 +225,7 @@ int test2()
 // -------------------------------------------------
 void test()
 {
-  typedef jaba::function_ref<void(int)> TCallback;
+  typedef Delegate<void(int)> TCallback;
   
   //typedef ssvu::FastFunc<void(int)> TCallback;
   CBase b;
@@ -244,18 +241,17 @@ void test()
     printf("Hi from non-captured-params lambda %d, with params %d\n", a, id);
   };
 
-
-  //TCallback c1 = [&b](int x) { b.method1(x); };
-  //c1(6);
-  //TCallback c2 = c1;
-  //c2(7);
+  TCallback c1 = [&b](int x) { b.method1(x); };
+  c1(6);
+  TCallback c2 = c1;
+  c2(7);
 
   // ------------------------------------------
   TMsgBus<TCallback> bus;
-    //bus.add(10, [&b](int x) { b.method1(x); });
-    //bus.add(10, [&b](int x) { b.method2(x); });
-    //bus.add(10, [&d1](int x) { d1.method1(x); });
-   // bus.add(10, lambda1);
+    bus.add(10, [&b](int x) { b.method1(x); });
+    bus.add(10, [&b](int x) { b.method2(x); });
+    bus.add(10, [&d1](int x) { d1.method1(x); });
+    bus.add(10, lambda1);
     bus.add(10, publicFn);
     //bus.add(10, TCallback::make< CBase, &CBase::method1 >(&b));
     //bus.add(10, TCallback::make< CDerived1, &CDerived1::method1 >(&d1));
@@ -269,6 +265,7 @@ void test()
 int main()
 {
   test2();
+  test();
   return 0;
 }
 
