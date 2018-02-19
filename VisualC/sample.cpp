@@ -1,7 +1,6 @@
 #include <map>
 #include <cstdio>
 #include "callbacks.h"
-#include "fast_func.h"
 
 // ------------------------------------------
 template< typename TCallbackType >
@@ -59,162 +58,6 @@ void publicFn(int a) {
 }
 
 
-#include <cassert>
-#include <memory>
-
-// struct Lambda declaration
-template<typename Func> struct Lambda;
-
-// Implementation details cannot be instantiated in user code
-namespace details
-{
-  // Lambda_impl is an internal class that adds the ability to execute to Lambdas.
-  template<typename Func> struct Lambda_impl;
-
-  template <typename Out, typename... In>
-  struct Lambda_impl<Out(In...)>
-  {
-    friend struct Lambda<Out(In...)>;
-
-    ~Lambda_impl() { if (deleteLambda != nullptr) deleteLambda(func_ptr); }
-
-  private:
-
-    template<typename Func>
-    Lambda_impl(Func&& func)
-      : func_ptr(new Func(std::move(func)))
-      , deleteLambda([](void *func_ptr) { delete (Func *)func_ptr; })
-      , executeLambda([](void *func, In... arguments) -> Out
-    {
-      return ((Func *)func)->operator()(arguments...);
-    }) { }
-
-    void *func_ptr;
-    Out(*executeLambda)(void *, In...);
-    void(*deleteLambda)(void *);
-  };
-
-  // Template specialization for function returning void
-  template <typename... In> struct Lambda_impl<void(In...)>
-  {
-    friend struct Lambda<void(In...)>;
-
-    ~Lambda_impl() { if (deleteLambda != nullptr) deleteLambda(func_ptr); }
-
-  private:
-
-    template<typename Func>
-    Lambda_impl(Func&& func)
-      : func_ptr(new Func(std::move(func)))
-      , deleteLambda([](void *func_ptr) { delete (Func *)func_ptr; })
-      , executeLambda([](void *func, In... arguments)
-    {
-      return ((Func *)func)->operator()(arguments...);
-    }) { }
-
-    void *func_ptr;
-    void(*executeLambda)(void *, In...);
-    void(*deleteLambda)(void *);
-  };
-} // end of details namespace
-
-  // Lambda implementation can be instantiated directly in user code.
-template <typename Out, typename ...In> struct Lambda<Out(In...)>
-{
-  // Nullary constructor
-  Lambda() { }
-
-  // Unary constructor
-  template<typename Func>
-  Lambda(Func&& func)
-    : impl(new details::Lambda_impl<Out(In...)>(std::forward<Func>(func))) { }
-
-  // Destructor
-  virtual ~Lambda() { }
-
-  // Move constructor
-  Lambda(Lambda<Out(In...)>&& other) { impl.swap(other.impl); }
-
-  // Boolean operator overload
-  operator bool() { return impl != nullptr; }
-
-  // Lambda call operator overload
-  Out operator()(In ... in)
-  {
-    assert(impl != nullptr);
-    impl->executeLambda(impl->func_ptr, in...);
-  }
-
-private:
-  // No copy constructor
-  Lambda(const Lambda& other);
-
-  std::unique_ptr<details::Lambda_impl<Out(In...)>> impl;
-};
-
-
-int test_lambda()
-{
-  typedef Lambda<void(int)> TLambda;
-  int z = 10;
-  TLambda func = [z](int a) { 
-    int r = a + z;
-    std::printf("Testing TLambda %d, z=%d -> R=%d\n", a, z, r);
-  };
-  printf("Sizeof TLambda is %zd\n", sizeof(TLambda));
-
-  func(10);
-  func(5);
-
-  return 0;
-}
-
-#include <new>
-
-// ------------------------------------------------------------------
-template <typename TFn, size_t N = 24>
-class Delegate;
-
-// ------------------------------------------------------------------
-template <typename TResult, typename ...Args, size_t N>
-class Delegate<TResult(Args...), N> {
-
-  // Pointer to the function which will do the real code
-  TResult(*caller)(const void*, Args...) = nullptr;
-  
-  // To store the Func lambda args
-  char     storage[N];
-  
-  // Function template generator that will restore the erased type to the original calling function
-  // from the fn_voids
-  template< typename Func >
-  static TResult callGenerator( const void* fn_void, Args... args) {
-    return (*reinterpret_cast<const Func *>(fn_void))(std::forward<Args...>(args...));
-  }
-
-public:
-  
-  // Single ctor from a callable
-  template< typename Func >
-  Delegate(Func f)
-    : caller(&callGenerator<Func>) {
-    
-    // Too may lambda capture args might require more space in the local storage
-    static_assert(sizeof(Func) <= N, "Need more space to store callback. Increase the template arg N of the callback.");
-    
-    // Copy f into storage erasing the type
-    new (storage) Func(static_cast<Func&&>(f));
-    
-    // printf("Using %zd/%zd bytes of the storage\n", sizeof(Func), N);
-  }
-
-  // Operator() forwards call to our specific callGenerator with the given args
-  TResult operator()(Args... args) const {
-    return caller(storage, std::forward<Args...>(args...));
-  }
-
-};
-
 
 
 
@@ -224,8 +67,8 @@ void static_int(int id) {
 
 int test2()
 {
-  typedef Delegate<void(int), 56> TCBBig;
-  typedef Delegate<void(int)> TCB;
+  typedef jaba::Delegate<void(int), 56> TCBBig;
+  typedef jaba::Delegate<void(int)> TCB;
   TCB c1(static_int);
   printf("sizeof of TCBBig is %zd\n", sizeof(TCBBig));
   printf("sizeof of TCB is %zd\n", sizeof(TCB));
@@ -246,9 +89,8 @@ int test2()
 // -------------------------------------------------
 void test()
 {
-  typedef Delegate<void(int)> TCallback;
+  typedef jaba::Delegate<void(int)> TCallback;
   
-  //typedef ssvu::FastFunc<void(int)> TCallback;
   CBase b;
   CDerived1 d1;
   CBase* d2 = new CDerived2;
