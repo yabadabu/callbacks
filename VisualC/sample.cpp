@@ -172,11 +172,11 @@ int test_lambda()
 #include <new>
 
 template <typename TFn>
-struct Delegate;
+class Delegate;
 
 // ------------------------------------------------------------------
 template <typename TResult, typename ...Args>
-struct Delegate<TResult(Args...)> {
+class Delegate<TResult(Args...)> {
   TResult(*generator)(const void*, Args...) = nullptr;
   char     storage[24];
   
@@ -187,6 +187,8 @@ struct Delegate<TResult(Args...)> {
     return const_cast<Func &>(*reinterpret_cast<const Func *>(fn_void))(args...);
   }
 
+public:
+  
   template< typename Func >
   Delegate(Func f) {
     new (getStorage()) Func(static_cast<Func&&>(f));
@@ -194,7 +196,7 @@ struct Delegate<TResult(Args...)> {
   }
 
   TResult operator()(Args... args) {
-    generator(getStorage(), args...);
+    return generator(getStorage(), args...);
   }
 
 };
