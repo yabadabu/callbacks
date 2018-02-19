@@ -81,6 +81,12 @@ int test2()
   c2(20);
   c3(30);
 
+  TCB c4;
+  if( true ) {
+    c4 = TCB( [](int id) { printf( "Hi from tmp\n"); });
+  }
+  c4(50);
+
   printf("sizeof of TCB is %zd\n", sizeof(c2));
   return 0;
 }
