@@ -171,18 +171,19 @@ int test_lambda()
 
 #include <new>
 
-template <typename TFn>
+// ------------------------------------------------------------------
+template <typename TFn, size_t N = 24>
 class Delegate;
 
 // ------------------------------------------------------------------
-template <typename TResult, typename ...Args>
-class Delegate<TResult(Args...)> {
+template <typename TResult, typename ...Args, size_t N>
+class Delegate<TResult(Args...), N> {
 
   // Pointer to the function which will do the real code
   TResult(*caller)(const void*, Args...) = nullptr;
   
   // To store the Func lambda args
-  char     storage[24];
+  char     storage[N];
   
   // Function template generator that will restore the erased type to the original calling function
   // from the fn_voids
@@ -195,8 +196,8 @@ public:
   
   // Single ctor from a callable
   template< typename Func >
-  Delegate(Func f) 
-  : caller(&callGenerator<Func>) {
+  Delegate(Func f)
+    : caller(&callGenerator<Func>) {
     // Copy f into storage erasing the type
     new (storage) Func(static_cast<Func&&>(f));
   }
@@ -217,9 +218,11 @@ void static_int(int id) {
 
 int test2()
 {
+  typedef Delegate<void(int), 56> TCBBig;
   typedef Delegate<void(int)> TCB;
   TCB c1(static_int);
-  printf("sizeof of TCB is %zd\n", sizeof( TCB ));
+  printf("sizeof of TCBBig is %zd\n", sizeof(TCBBig));
+  printf("sizeof of TCB is %zd\n", sizeof(TCB));
   float f = 3.14f;
   TCB c2 = [f](int id) {
     printf("Hi from lambda with f = %f. id=%d\n", f, id);
