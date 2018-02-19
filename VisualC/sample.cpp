@@ -173,17 +173,20 @@ int test_lambda()
 
 #define FUNC_FORWARD(type, value) static_cast<type &&>(value)
 
+template <typename TFn>
+struct Delegate;
+
 // ------------------------------------------------------------------
 // Lambda implementation can be instantiated directly in user code.
-template <typename TFn>
-struct Delegate {
-  void (*generator)(void*, int) = nullptr;
-  char   storage[24];
+template <typename TResult>
+struct Delegate<TResult(int)> {
+  TResult(*generator)(void*, int) = nullptr;
+  char     storage[24];
   
   void* getStorage() { return &storage[0]; }
 
   template< typename Func >
-  static void callGenerator( void* fn_void, int id ) {
+  static TResult callGenerator( void* fn_void, int id ) {
     return const_cast<Func &>(*reinterpret_cast<const Func *>(fn_void))(id);
   }
 
@@ -194,7 +197,7 @@ struct Delegate {
     generator = &callGenerator<Func>;
   }
 
-  void call(int id) {
+  TResult call(int id) {
     generator(getStorage(), id);
   }
 
