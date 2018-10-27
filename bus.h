@@ -14,7 +14,7 @@ namespace jaba {
       template< typename TMsg >
       class TMsgBus {
 
-        typedef Callback<void(TMsg&), 16> TCB;
+        typedef Callback<void(TMsg&), 24> TCB;
 
         struct TSlot {
           TCB cb;
@@ -26,10 +26,14 @@ namespace jaba {
 
       public:
 
-        TMsgBus() { }
+        TMsgBus() { 
+          printf( "Creating bus with slots of size %ld - %ld\n", sizeof( TSlot ), sizeof( TCB ));
+        }
 
         void add(TCB cb, int priority) {
-          TSlot s = { cb, priority };
+          TSlot s;
+          s.cb = cb;
+          s.priority = priority;
           auto it = std::lower_bound(slots.begin(), slots.end(), s);
           slots.insert(it, s);
         }
@@ -77,7 +81,12 @@ namespace jaba {
     }
 
     template< typename M >
-    void emit(M& m) {
+    void emitRef(M& m) {
+      internal::getBus<M>().on(m);
+    }
+
+    template< typename M >
+    void emit(M m) {
       internal::getBus<M>().on(m);
     }
 
