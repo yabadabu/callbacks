@@ -1,6 +1,7 @@
 #include <map>
 #include <cstdio>
 #include "callbacks.h"
+#include "bus.h"
 
 // ------------------------------------------
 template< typename TCallbackType >
@@ -130,11 +131,77 @@ void test()
 }
 
 
+
+
+// ------------------------------------------------------
+struct MsgRender {
+  int id = 0;
+  int counter = 0;
+};
+struct MsgHelp {};
+
+using namespace jaba::bus;
+
+class CA {
+
+  void onRender(MsgRender& m) {
+    m.counter++;
+    printf("%p CA.onRender %d %d\n", this, m.id, m.counter);
+  }
+
+public:
+  CA( ) {
+    subscribe(this, &CA::onRender);
+  }
+  ~CA() {
+    unsubscribe(this, &CA::onRender);
+    printf("Deleting CA %p\n", this);
+  }
+};
+
+class CB {
+public:
+  void onHelp(MsgRender& m) {
+    m.counter++;
+    printf("%p CB.onHelp %d %d\n", this, m.id, m.counter);
+  }
+};
+
+void test3() {
+
+  CB b1;
+  subscribe(&b1, &CB::onHelp);
+
+  {
+    CA a1;    // Autosubscribed in ctor
+    CB b2;
+    // Registered later with higher priority (number is lower)
+    subscribe(&b2, &CB::onHelp, -1);
+
+    printf("&b1 = %p\n", &b1);
+    printf("&b2 = %p\n", &b2);
+    
+    emit(MsgRender{ 1 });
+    printf("Emit 1 complete\n");
+
+    MsgRender m = { 2 };
+    emit(m);
+    printf("After emit %d m.counter = %d\n", m.id, m.counter);
+  }
+
+  printf("Emitting MsgRender 3\n");
+  emit(MsgRender{ 3 });
+  printf("Emitting MsgHelp\n");
+  emit(MsgHelp{});
+
+}
+
 // ------------------------------------------------------
 int main()
 {
-  test2();
-  test();
+  //test2();
+  //test();
+  test3();
   return 0;
 }
 

@@ -52,6 +52,10 @@ namespace jaba {
       return caller(storage, std::forward<Args...>(args...));
     }
 
+    bool operator==(const Callback& other) const {
+      return memcmp(storage, other.storage, N) == 0;
+    }
+
   };
 }
 
