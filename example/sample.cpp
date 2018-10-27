@@ -137,6 +137,7 @@ void test()
 struct MsgRender {
   int id = 0;
   int counter = 0;
+  MsgRender( int new_id ) : id(new_id) {}
 };
 struct MsgHelp {};
 
@@ -181,16 +182,16 @@ void test3() {
     printf("&b1 = %p\n", &b1);
     printf("&b2 = %p\n", &b2);
     
-    emit(MsgRender{ 1 });
+    emit(MsgRender(1));
     printf("Emit 1 complete\n");
 
-    MsgRender m = { 2 };
-    emit(m);
+    MsgRender m(2);
+    emitRef(m);
     printf("After emit %d m.counter = %d\n", m.id, m.counter);
   }
 
   printf("Emitting MsgRender 3\n");
-  emit(MsgRender{ 3 });
+  emit(MsgRender( 3 ));
   printf("Emitting MsgHelp\n");
   emit(MsgHelp{});
 

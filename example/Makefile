@@ -9,7 +9,7 @@ TARGET = test
 $(TARGET) : $(OBJS)
 	$(CC) -o $@ $(OBJS) -lstdc++
 
-$(OBJS_PATH)/%.o : ./%.cpp ../callbacks.h
+$(OBJS_PATH)/%.o : ./%.cpp ../callbacks.h ../bus.h
 	mkdir -p $(OBJS_PATH) && $(CC) $(CFLAGS) -o $@ $<
 
 run :
