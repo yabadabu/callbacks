@@ -8,7 +8,7 @@ namespace jaba {
 
   // ------------------------------------------------------------------
   // N could be as small as 8 if you just need an arg in the lambda's
-  template <typename Fn, size_t N = 24> 
+  template <typename Fn, size_t N = 24>
   class Callback;
 
   // ------------------------------------------------------------------
@@ -25,7 +25,7 @@ namespace jaba {
     // from the fn_voids
     template< typename Func >
     static Result callGenerator(const void* fn_void, Args... args) {
-      return (*reinterpret_cast<const Func *>(fn_void))(std::forward<Args...>(args...));
+      return (*reinterpret_cast<const Func*>(fn_void))(std::forward<Args>(args)...);
     }
 
   public:
@@ -48,13 +48,15 @@ namespace jaba {
 
     // Operator() forwards call to our specific callGenerator with the given args
     Result operator()(Args... args) const {
-      assert( caller );
-      return caller(storage, std::forward<Args...>(args...));
+      assert(caller);
+      return caller(storage, std::forward<Args>(args)...);
     }
 
     bool operator==(const Callback& other) const {
       return memcmp(storage, other.storage, N) == 0;
     }
+
+    operator bool() const { return caller != nullptr; }
 
   };
 }

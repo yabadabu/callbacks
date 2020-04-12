@@ -63,7 +63,7 @@ void publicFn(int a) {
 
 
 void static_int(int id) {
-  printf("Hi from static_int %d\n", id );
+  printf("Hi from static_int %d\n", id);
 }
 
 int test2()
@@ -77,14 +77,14 @@ int test2()
   TCB c2 = [f](int id) {
     printf("Hi from lambda with f = %f. id=%d\n", f, id);
   };
-  TCB c3( c1 );
+  TCB c3(c1);
   c1(10);
   c2(20);
   c3(30);
 
   TCB c4;
-  if( true ) {
-    c4 = TCB( [](int id) { printf( "Hi from tmp\n"); });
+  if (true) {
+    c4 = TCB([](int id) { printf("Hi from tmp\n"); });
   }
   c4(50);
 
@@ -97,7 +97,7 @@ int test2()
 void test()
 {
   typedef jaba::Callback<void(int)> TCallback;
-  
+
   CBase b;
   CDerived1 d1;
   CBase* d2 = new CDerived2;
@@ -118,15 +118,15 @@ void test()
 
   // ------------------------------------------
   TMsgBus<TCallback> bus;
-    bus.add(10, [&b, id](int x) { b.method1(x); printf("id is %d\n", id); });  // This requires 16 bytes
-    bus.add(10, [&b](int x) { b.method2(x); });
-    bus.add(10, [&d1](int x) { d1.method1(x); });
-    bus.add(10, lambda1);
-    bus.add(10, publicFn);
-    //bus.add(10, TCallback::make< CBase, &CBase::method1 >(&b));
-    //bus.add(10, TCallback::make< CDerived1, &CDerived1::method1 >(&d1));
-    //bus.add(10, TCallback::make< CBase, &CBase::method1 >(&d1));
-    //bus.add(10, 3);     // Now fails with the error: 'term does not evaluate to a function taking 1 argument inside the callacks.h
+  bus.add(10, [&b, id](int x) { b.method1(x); printf("id is %d\n", id); });  // This requires 16 bytes
+  bus.add(10, [&b](int x) { b.method2(x); });
+  bus.add(10, [&d1](int x) { d1.method1(x); });
+  bus.add(10, lambda1);
+  bus.add(10, publicFn);
+  //bus.add(10, TCallback::make< CBase, &CBase::method1 >(&b));
+  //bus.add(10, TCallback::make< CDerived1, &CDerived1::method1 >(&d1));
+  //bus.add(10, TCallback::make< CBase, &CBase::method1 >(&d1));
+  //bus.add(10, 3);     // Now fails with the error: 'term does not evaluate to a function taking 1 argument inside the callacks.h
   bus.on(10);
 }
 
@@ -137,7 +137,7 @@ void test()
 struct MsgRender {
   int id = 0;
   int counter = 0;
-  MsgRender( int new_id ) : id(new_id) {}
+  MsgRender(int new_id) : id(new_id) {}
 };
 struct MsgHelp {};
 
@@ -151,7 +151,7 @@ class CA {
   }
 
 public:
-  CA( ) {
+  CA() {
     subscribe(this, &CA::onRender);
   }
   ~CA() {
@@ -181,7 +181,7 @@ void test3() {
 
     printf("&b1 = %p\n", &b1);
     printf("&b2 = %p\n", &b2);
-    
+
     emit(MsgRender(1));
     printf("Emit 1 complete\n");
 
@@ -191,10 +191,23 @@ void test3() {
   }
 
   printf("Emitting MsgRender 3\n");
-  emit(MsgRender( 3 ));
+  emit(MsgRender(3));
   printf("Emitting MsgHelp\n");
   emit(MsgHelp{});
 
+}
+
+// ------------------------------------------------------
+typedef jaba::Callback<void(int, float)> TCallbackx2Args;
+
+void simple2Args(int ival, float fval) {
+  printf("@simple2Args %d %f\n", ival, fval);
+}
+
+void testArgs() {
+  TCallbackx2Args cb;
+  cb = simple2Args;
+  cb(1, 1.2f);
 }
 
 // ------------------------------------------------------
@@ -203,6 +216,7 @@ int main()
   //test2();
   //test();
   test3();
+  testArgs();
   return 0;
 }
 

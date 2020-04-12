@@ -26,8 +26,8 @@ namespace jaba {
 
       public:
 
-        TMsgBus() { 
-          printf( "Creating bus with slots of size %ld - %ld\n", sizeof( TSlot ), sizeof( TCB ));
+        TMsgBus() {
+          printf("Creating bus with slots of size %lld - %lld\n", sizeof(TSlot), sizeof(TCB));
         }
 
         void add(TCB cb, int priority) {
@@ -44,11 +44,11 @@ namespace jaba {
             slots.end(),
             [cb](const TSlot& s) {
               return s.cb == cb;
-          });
+            });
 
           slots.erase(it, slots.end());
         }
-        
+
         void on(TMsg& m) {
           for (auto s : slots)
             s.cb(m);
@@ -67,17 +67,17 @@ namespace jaba {
     }
 
     template< typename T, typename M >
-    void subscribe(T* obj, void (T::*method)(M&), int priority = 0) {
+    void subscribe(T* obj, void (T::* method)(M&), int priority = 0) {
       internal::getBus< M >().add([obj, method](M& msg) {
         (obj->*method)(msg);
-      }, priority);
+        }, priority);
     }
 
     template< typename T, typename M >
-    void unsubscribe(T* obj, void (T::*method)(M&)) {
+    void unsubscribe(T* obj, void (T::* method)(M&)) {
       internal::getBus< M >().del([obj, method](M& msg) {
         (obj->*method)(msg);
-      });
+        });
     }
 
     template< typename M >
