@@ -19,7 +19,7 @@ namespace jaba {
     Result(*caller)(const void*, Args...) = nullptr;
 
     // To store the Func lambda args
-    char     storage[N];
+    char     storage[N] = { 0 };
 
     // Function template generator that will restore the erased type to the original calling function
     // from the fn_voids
