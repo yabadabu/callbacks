@@ -46,7 +46,8 @@ namespace jaba {
               return s.cb == cb;
             });
 
-          slots.erase(it, slots.end());
+          if (it != slots.end())
+            slots.erase(it, slots.end());
         }
 
         void on(TMsg& m) {
